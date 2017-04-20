@@ -2,16 +2,9 @@
 
   angular.module('sandbox').config(function($routeProvider) {
       $routeProvider.when('/sandbox/:id', {
-        controller: 'SandboxFooCtrl',
-        templateUrl: '~/sandbox/FooCtrl.html',
-        resolve: {
-          activeTab: function() { return 'summary'; },
-          myContact: function(crmApi, $route) {
-            return crmApi('Contact', 'getsingle', {
-              id: $route.current.params.id,
-              return: ['first_name', 'last_name']
-            });
-          }
+        template: '<div></div>',
+        controller: function($route, $location) {
+          $location.path('/sandbox/' + $route.current.params.id + '/summary');
         }
       });
 

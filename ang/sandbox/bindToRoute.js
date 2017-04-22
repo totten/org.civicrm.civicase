@@ -8,6 +8,7 @@
     $injector.get('$rootScope').$on('$routeUpdate', function () {
       // Only reload if someone else -- like the user or an <a href> -- changed URL.
       if (!internalUpdate) {
+        console.log('reload route');
         $injector.get('$route').reload();
       }
     });
@@ -45,6 +46,30 @@
           }, 50);
         });
       };
+      Object.getPrototypeOf($delegate).$bindValueToRoute = function (scopeVar, queryParam, queryDefault) {
+        registerGlobalListener($injector);
+
+        var _scope = this;
+        var $route = $injector.get('$route'), $timeout = $injector.get('$timeout');
+
+        _scope[scopeVar] = $route.current.params[queryParam] || queryDefault;
+
+        // Keep the URL bar up-to-date.
+        _scope.$watch(scopeVar, function (newValue) {
+          internalUpdate = true;
+
+          var p = angular.extend({}, $route.current.params);
+          p[queryParam] = newValue;
+          $route.updateParams(p);
+
+          if (activeTimer) $timeout.cancel(activeTimer);
+          activeTimer = $timeout(function () {
+            internalUpdate = false;
+            activeTimer = null;
+          }, 50);
+        });
+      };
+
       return $delegate;
     });
   });

@@ -1,6 +1,6 @@
 (function (angular, $, _) {
 
-  angular.module('sandbox').factory('crmUiBindRoute', function ($location, $rootScope, $timeout, $route) {
+  angular.module('sandbox').factory('crmUiBindRoute', function ($rootScope, $timeout, $route) {
     var internalUpdate = false, activeTimer = null;
     $rootScope.$on('$routeUpdate', function () {
       // Only reload if someone else -- like the user or an <a href> -- changed URL.
@@ -11,8 +11,9 @@
 
     return function ($scope, scopeExpr, queryParam, queryDefaults) {
       if (!queryDefaults) queryDefaults = {};
-      if ($location.search()[queryParam]) {
-        $scope[scopeExpr] = JSON.parse($location.search()[queryParam]);
+
+      if ($route.current.params[queryParam]) {
+        $scope[scopeExpr] = JSON.parse($route.current.params[queryParam]);
       }
       else {
         $scope[scopeExpr] = angular.extend({}, queryDefaults);
@@ -21,7 +22,13 @@
       // Keep the URL bar up-to-date.
       $scope.$watchCollection(scopeExpr, function (newFilters) {
         internalUpdate = true;
-        $location.search(queryParam, JSON.stringify(newFilters));
+
+        // I think this $route.updateParams() works with more types of params?
+        // $location.search(queryParam, JSON.stringify(newFilters));
+        var p = angular.extend({}, $route.current.params);
+        p[queryParam] = JSON.stringify(newFilters);
+        $route.updateParams(p);
+
         if (activeTimer) $timeout.cancel(activeTimer);
         activeTimer = $timeout(function () {
           internalUpdate = false;

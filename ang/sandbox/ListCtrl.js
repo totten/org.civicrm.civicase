@@ -1,48 +1,55 @@
 (function (angular, $, _) {
+  var internalUpdate = false, activeTimer = null;
 
-  angular.module('sandbox').factory('crmUiBindRoute', function ($rootScope, $timeout, $route) {
-    var internalUpdate = false, activeTimer = null;
+  angular.module('sandbox').config(function ($provide) {
+    $provide.decorator('$rootScope', function ($delegate, $injector) {
+      Object.getPrototypeOf($delegate).$bindToRoute = function (scopeVar, queryParam, queryDefaults) {
+        var _scope = this;
+        if (!queryDefaults) queryDefaults = {};
+
+        var $route = $injector.get('$route'), $timeout = $injector.get('$timeout');
+
+        if ($route.current.params[queryParam]) {
+          _scope[scopeVar] = JSON.parse($route.current.params[queryParam]);
+        }
+        else {
+          _scope[scopeVar] = angular.extend({}, queryDefaults);
+        }
+
+        // Keep the URL bar up-to-date.
+        _scope.$watchCollection(scopeVar, function (newFilters) {
+          internalUpdate = true;
+
+          var p = angular.extend({}, $route.current.params);
+          p[queryParam] = JSON.stringify(newFilters);
+          $route.updateParams(p);
+
+          if (activeTimer) $timeout.cancel(activeTimer);
+          activeTimer = $timeout(function () {
+            internalUpdate = false;
+            activeTimer = null;
+          }, 50);
+        });
+      };
+      return $delegate;
+    });
+  });
+
+  angular.module('sandbox').run(function ($rootScope, $injector) {
     $rootScope.$on('$routeUpdate', function () {
       // Only reload if someone else -- like the user or an <a href> -- changed URL.
       if (!internalUpdate) {
-        $route.reload();
+        $injector.get('$route').reload();
       }
     });
 
-    return function ($scope, scopeExpr, queryParam, queryDefaults) {
-      if (!queryDefaults) queryDefaults = {};
-
-      if ($route.current.params[queryParam]) {
-        $scope[scopeExpr] = JSON.parse($route.current.params[queryParam]);
-      }
-      else {
-        $scope[scopeExpr] = angular.extend({}, queryDefaults);
-      }
-
-      // Keep the URL bar up-to-date.
-      $scope.$watchCollection(scopeExpr, function (newFilters) {
-        internalUpdate = true;
-
-        // I think this $route.updateParams() works with more types of params?
-        // $location.search(queryParam, JSON.stringify(newFilters));
-        var p = angular.extend({}, $route.current.params);
-        p[queryParam] = JSON.stringify(newFilters);
-        $route.updateParams(p);
-
-        if (activeTimer) $timeout.cancel(activeTimer);
-        activeTimer = $timeout(function () {
-          internalUpdate = false;
-          activeTimer = null;
-        }, 50);
-      });
-    };
   });
 
   angular.module('sandbox').config(function ($routeProvider) {
       $routeProvider.when('/sandbox', {
         reloadOnSearch: false,
-        controller: function ($scope, crmUiBindRoute) {
-          crmUiBindRoute($scope, 'contactFilters', 'contacts', {
+        controller: function ($scope) {
+          $scope.$bindToRoute('contactFilters', 'contacts', {
             contact_type: 'Individual'
           });
         },

@@ -21,24 +21,8 @@
       </ul>
     </div>
   </nav>
-  <div ng-show="activeTab === 'summary'">
-    Summary!
-    <form name="myForm" crm-ui-id-scope>
-      <input name="first_name" ng-model="myContact.first_name" class="crm-form-text" placeholder="{{ts('First')}}" />
-      <input name="last_name" ng-model="myContact.last_name" class="crm-form-text" placeholder="{{ts('Last')}}" />
-    </form>
-  </div>
-  <div ng-if="activeTab === 'activities'">
-    Activities!
-    <select ng-model="filters.activity_type_id">
-      <option value="">Any</option>
-      <option value="Meeting">Meeting</option>
-      <option value="Follow up">Follow up</option>
-    </select>
-    <ul>
-      <li ng-repeat="activity in apiCall.activities.values">{{activity.activity_date_time}} ({{activity.activity_type_id}})</li>
-    </ul>
-  </div>
+  <div ng-show="activeTab === 'summary'" ng-include="'~/sandbox/FooCtrl/summary.html'"></div>
+  <div ng-if="activeTab === 'activities'" ng-include="'~/sandbox/FooCtrl/activities.html'"></div>
   <div ng-if="activeTab === 'people'">People!</div>
   <div ng-if="activeTab === 'files'">Files!</div>
 

@@ -1,0 +1,9 @@
+    Activities!
+    <select ng-model="filters.activity_type_id">
+      <option value="">Any</option>
+      <option value="Meeting">Meeting</option>
+      <option value="Follow up">Follow up</option>
+    </select>
+    <ul>
+      <li ng-repeat="activity in apiCall.activities.values">{{activity.activity_date_time}} ({{activity.activity_type_id}})</li>
+    </ul>

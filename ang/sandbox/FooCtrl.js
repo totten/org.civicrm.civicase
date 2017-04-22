@@ -1,13 +1,6 @@
 (function(angular, $, _) {
 
   angular.module('sandbox').config(function($routeProvider) {
-      $routeProvider.when('/sandbox/:id', {
-        template: '<div></div>',
-        controller: function($route, $location) {
-          $location.path('/sandbox/' + $route.current.params.id + '/summary');
-        }
-      });
-
       $routeProvider.when('/sandbox/:id/:tab', {
         controller: 'SandboxFooCtrl',
         templateUrl: '~/sandbox/FooCtrl.html',

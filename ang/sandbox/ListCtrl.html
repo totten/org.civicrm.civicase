@@ -1,16 +1,3 @@
 <div crm-ui-debug="contactQuery.params"/>
-<div
-  civicase-api3-ctrl="contactQuery"
-  civicase-api3="['Contact','get', contactFilters]"
-></div>
-<!--civicase-api3-refresh="init"-->
-
-<div>
-  <input ng-model="contactQuery.params.display_name"/>
-</div>
-
-<ul>
-  <li ng-repeat="contact in contactQuery.result.values"><a
-    ng-href="#/sandbox/{{contact.id}}/summary">{{contact.display_name}}</a>
-  </li>
-</ul>
+<div civicase-api3-ctrl="contactQuery" civicase-api3="['Contact','get', contactFilters]"></div>
+<div sandbox-contacts="contactQuery"></div>

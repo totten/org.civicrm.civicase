@@ -1,9 +1,23 @@
 (function (angular, $, _) {
-  var internalUpdate = false, activeTimer = null;
+  var internalUpdate = false, activeTimer = null, registered = false;
+
+  function registerGlobalListener($injector) {
+    if (registered) return;
+    registered = true;
+
+    $injector.get('$rootScope').$on('$routeUpdate', function () {
+      // Only reload if someone else -- like the user or an <a href> -- changed URL.
+      if (!internalUpdate) {
+        $injector.get('$route').reload();
+      }
+    });
+  }
 
   angular.module('sandbox').config(function ($provide) {
     $provide.decorator('$rootScope', function ($delegate, $injector) {
       Object.getPrototypeOf($delegate).$bindToRoute = function (scopeVar, queryParam, queryDefaults) {
+        registerGlobalListener($injector);
+
         var _scope = this;
         if (!queryDefaults) queryDefaults = {};
 
@@ -33,16 +47,6 @@
       };
       return $delegate;
     });
-  });
-
-  angular.module('sandbox').run(function ($rootScope, $injector) {
-    $rootScope.$on('$routeUpdate', function () {
-      // Only reload if someone else -- like the user or an <a href> -- changed URL.
-      if (!internalUpdate) {
-        $injector.get('$route').reload();
-      }
-    });
-
   });
 
   angular.module('sandbox').config(function ($routeProvider) {

@@ -198,6 +198,7 @@
       if (angular.equals($scope.filters, {})) {
         getCases();
       }
+      $scope.$bindToRoute('filters', 'cf');
     });
 
   });

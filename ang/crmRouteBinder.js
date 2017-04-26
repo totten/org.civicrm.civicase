@@ -56,7 +56,9 @@
         var _scope = this;
         var $route = $injector.get('$route'), $timeout = $injector.get('$timeout');
 
-        _scope[scopeVar] = $route.current.params[queryParam] || queryDefault;
+        if (!(scopeVar in _scope)) {
+          _scope[scopeVar] = $route.current.params[queryParam] || queryDefault;
+        }
 
         // Keep the URL bar up-to-date.
         _scope.$watch(scopeVar, function (newValue) {
